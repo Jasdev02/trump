@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Trump Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin: 20px 0 10px;
+            font-size: 1.2em;
+        }
+
+        .modal-content ul {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content li {
+            margin: 8px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .game-container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .scoreboard {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-display {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            display: inline-block;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-display h2 {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .score-numbers {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item .label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .score-item .value {
+            color: #667eea;
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .cards-area {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #5a67d8 0%, #7c3aed 100%);
+            border-radius: 20px;
+            width: 350px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            color: white;
+            position: relative;
+        }
+
+        .card.opponent {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .card.player {
+            background: linear-gradient(135deg, #5a67d8 0%, #7c3aed 100%);
+        }
+
+        .card.winner {
+            animation: pulse 0.5s ease-in-out;
+            border: 3px solid gold;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-logo {
+            font-size: 3em;
+            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-tagline {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .vs-divider {
+            font-size: 3em;
+            color: white;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .stat-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+
+        .stat-row.selected {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            background: white;
+            color: #5a67d8;
+            padding: 5px 15px;
+            border-radius: 8px;
+        }
+
+        .card.opponent .stat-value {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            filter: blur(5px);
+        }
+
+        .card.opponent.revealed .stat-value {
+            filter: blur(0);
+        }
+
+        .result-message {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 1.5em;
+            color: white;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        .result-message.win {
+            color: #48bb78;
+            text-shadow: 0 0 10px rgba(72, 187, 120, 0.5);
+        }
+
+        .result-message.lose {
+            color: #f56565;
+            text-shadow: 0 0 10px rgba(245, 101, 101, 0.5);
+        }
+
+        .result-message.tie {
+            color: #ffa500;
+            text-shadow: 0 0 10px rgba(255, 165, 0, 0.5);
+        }
+
+        .next-round-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .next-round-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .cards-area {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+                font-size: 2em;
+            }
+
+            .card {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Rules Modal -->
+    <div id="rulesModal" class="modal">
+        <div class="modal-content">
+            <h1>🏆 Company Trump Cards</h1>
+            <h2>How to Play:</h2>
+            <ul>
+                <li><strong>Objective:</strong> Win rounds by selecting the best financial metric from your company card</li>
+                <li><strong>Gameplay:</strong> Each round, you'll see your company card with various financial stats</li>
+                <li><strong>Your Move:</strong> Click on any stat you think is stronger than your opponent's</li>
+                <li><strong>Comparison:</strong> Your chosen stat will be compared with the opponent's same stat</li>
+                <li><strong>Winning:</strong> Higher values win for most stats (Revenue, Market Cap, Employees, Profit Margin, ROE, Growth)</li>
+                <li><strong>Special Stats:</strong> Lower is better for P/E Ratio and Debt-to-Equity</li>
+                <li><strong>Scoring:</strong> Win a round = +1 point. First to outpace your opponent wins!</li>
+            </ul>
+            <h2>Financial Metrics:</h2>
+            <ul>
+                <li><strong>Revenue:</strong> Annual revenue in billions ($B)</li>
+                <li><strong>Market Cap:</strong> Total market value in billions ($B)</li>
+                <li><strong>Employees:</strong> Total workforce size</li>
+                <li><strong>Profit Margin:</strong> Profitability percentage (%)</li>
+                <li><strong>P/E Ratio:</strong> Price-to-Earnings ratio (lower is better)</li>
+                <li><strong>Debt/Equity:</strong> Debt-to-Equity ratio (lower is better)</li>
+                <li><strong>ROE:</strong> Return on Equity percentage (%)</li>
+                <li><strong>Growth:</strong> Revenue growth percentage (%)</li>
+            </ul>
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="game-container hidden">
+        <!-- Scoreboard -->
+        <div class="scoreboard">
+            <div class="score-display">
+                <h2>Score</h2>
+                <div class="score-numbers">
+                    <div class="score-item">
+                        <div class="label">You</div>
+                        <div class="value" id="playerScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Opponent</div>
+                        <div class="value" id="opponentScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Round</div>
+                        <div class="value" id="roundNumber">1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Message -->
+        <div id="resultMessage" class="result-message"></div>
+
+        <!-- Cards Area -->
+        <div class="cards-area">
+            <!-- Opponent Card -->
+            <div class="card opponent" id="opponentCard">
+                <div class="card-header">
+                    <div class="card-logo" id="opponentLogo">❓</div>
+                    <div class="card-info">
+                        <div class="card-name" id="opponentName">Opponent</div>
+                        <div class="card-tagline" id="opponentTagline">Mystery Company</div>
+                    </div>
+                </div>
+                <div id="opponentStats"></div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <!-- Player Card -->
+            <div class="card player" id="playerCard">
+                <div class="card-header">
+                    <div class="card-logo" id="playerLogo">🏢</div>
+                    <div class="card-info">
+                        <div class="card-name" id="playerName">Your Company</div>
+                        <div class="card-tagline" id="playerTagline">Select a stat</div>
+                    </div>
+                </div>
+                <div id="playerStats"></div>
+            </div>
+        </div>
+
+        <!-- Next Round Button -->
+        <button id="nextRoundBtn" class="next-round-btn hidden" onclick="nextRound()">Next Round</button>
+    </div>
+
+    <script>
+        let companies = [];
+        let playerCard = null;
+        let opponentCard = null;
+        let playerScore = 0;
+        let opponentScore = 0;
+        let roundNumber = 1;
+        let gameActive = false;
+
+        // Stat configurations
+        const statConfig = {
+            revenue: { label: 'Revenue', unit: 'B', higherIsBetter: true },
+            marketCap: { label: 'Market Cap', unit: 'B', higherIsBetter: true },
+            employees: { label: 'Employees', unit: '', higherIsBetter: true },
+            profitMargin: { label: 'Profit Margin', unit: '%', higherIsBetter: true },
+            peRatio: { label: 'P/E Ratio', unit: '', higherIsBetter: false },
+            debtToEquity: { label: 'Debt/Equity', unit: '', higherIsBetter: false },
+            roe: { label: 'ROE', unit: '%', higherIsBetter: true },
+            growth: { label: 'Growth', unit: '%', higherIsBetter: true }
+        };
+
+        // Load companies data
+        async function loadCompanies() {
+            try {
+                const response = await fetch('companies_data.json');
+                companies = await response.json();
+                console.log('Companies loaded:', companies.length);
+            } catch (error) {
+                console.error('Error loading companies:', error);
+                alert('Error loading game data. Please ensure companies_data.json is in the same folder.');
+            }
+        }
+
+        function startGame() {
+            document.getElementById('rulesModal').classList.add('hidden');
+            document.getElementById('gameContainer').classList.remove('hidden');
+            gameActive = true;
+            setupRound();
+        }
+
+        function setupRound() {
+            // Select random cards
+            const shuffled = [...companies].sort(() => Math.random() - 0.5);
+            playerCard = shuffled[0];
+            opponentCard = shuffled[1];
+
+            // Reset UI
+            document.getElementById('resultMessage').textContent = '';
+            document.getElementById('nextRoundBtn').classList.add('hidden');
+            document.getElementById('opponentCard').classList.remove('revealed', 'winner');
+            document.getElementById('playerCard').classList.remove('winner');
+
+            // Display player card
+            document.getElementById('playerLogo').textContent = playerCard.logo;
+            document.getElementById('playerName').textContent = playerCard.name;
+            document.getElementById('playerTagline').textContent = playerCard.tagline;
+
+            // Display opponent card (hidden stats)
+            document.getElementById('opponentLogo').textContent = '❓';
+            document.getElementById('opponentName').textContent = 'Opponent';
+            document.getElementById('opponentTagline').textContent = 'Mystery Company';
+
+            // Render stats
+            renderStats('player', playerCard);
+            renderStats('opponent', opponentCard);
+
+            // Update scoreboard
+            document.getElementById('playerScore').textContent = playerScore;
+            document.getElementById('opponentScore').textContent = opponentScore;
+            document.getElementById('roundNumber').textContent = roundNumber;
+        }
+
+        function renderStats(type, card) {
+            const container = document.getElementById(`${type}Stats`);
+            container.innerHTML = '';
+
+            Object.keys(statConfig).forEach(statKey => {
+                const stat = statConfig[statKey];
+                const value = card[statKey];
+
+                const statRow = document.createElement('div');
+                statRow.className = 'stat-row';
+                statRow.dataset.stat = statKey;
+
+                statRow.innerHTML = `
+                    <span class="stat-label">${stat.label}</span>
+                    <span class="stat-value">${formatValue(value, stat.unit)}</span>
+                `;
+
+                if (type === 'player') {
+                    statRow.onclick = () => selectStat(statKey);
+                }
+
+                container.appendChild(statRow);
+            });
+        }
+
+        function formatValue(value, unit) {
+            if (unit === '') {
+                return value.toLocaleString();
+            }
+            return `${value.toLocaleString()}${unit}`;
+        }
+
+        function selectStat(statKey) {
+            if (!gameActive) return;
+
+            gameActive = false;
+
+            // Highlight selected stat
+            document.querySelectorAll('.stat-row').forEach(row => {
+                row.classList.remove('selected');
+            });
+            document.querySelector(`#playerStats .stat-row[data-stat="${statKey}"]`).classList.add('selected');
+            document.querySelector(`#opponentStats .stat-row[data-stat="${statKey}"]`).classList.add('selected');
+
+            // Reveal opponent card
+            document.getElementById('opponentCard').classList.add('revealed');
+            document.getElementById('opponentLogo').textContent = opponentCard.logo;
+            document.getElementById('opponentName').textContent = opponentCard.name;
+            document.getElementById('opponentTagline').textContent = opponentCard.tagline;
+
+            // Compare values
+            const playerValue = playerCard[statKey];
+            const opponentValue = opponentCard[statKey];
+            const higherIsBetter = statConfig[statKey].higherIsBetter;
+
+            let result;
+            if (playerValue === opponentValue) {
+                result = 'tie';
+            } else if (higherIsBetter) {
+                result = playerValue > opponentValue ? 'win' : 'lose';
+            } else {
+                result = playerValue < opponentValue ? 'win' : 'lose';
+            }
+
+            // Update scores and display result
+            const resultEl = document.getElementById('resultMessage');
+            if (result === 'win') {
+                playerScore++;
+                resultEl.textContent = '🎉 You Win This Round!';
+                resultEl.className = 'result-message win';
+                document.getElementById('playerCard').classList.add('winner');
+            } else if (result === 'lose') {
+                opponentScore++;
+                resultEl.textContent = '😞 You Lose This Round!';
+                resultEl.className = 'result-message lose';
+                document.getElementById('opponentCard').classList.add('winner');
+            } else {
+                resultEl.textContent = '🤝 It's a Tie!';
+                resultEl.className = 'result-message tie';
+            }
+
+            // Show next round button
+            document.getElementById('nextRoundBtn').classList.remove('hidden');
+        }
+
+        function nextRound() {
+            roundNumber++;
+            gameActive = true;
+            setupRound();
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCompanies();
+        });
+    </script>
+</body>
+</html>
