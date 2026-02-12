@@ -347,7 +347,7 @@
                 <li><strong>ROE:</strong> Return on Equity percentage (%)</li>
                 <li><strong>Growth:</strong> Revenue growth percentage (%)</li>
             </ul>
-            <button class="start-btn" onclick="startGame()">Start Game</button>
+            <button class="start-btn" id="startBtn">Start Game</button>
         </div>
     </div>
 
@@ -407,7 +407,7 @@
         </div>
 
         <!-- Next Round Button -->
-        <button id="nextRoundBtn" class="next-round-btn hidden" onclick="nextRound()">Next Round</button>
+        <button id="nextRoundBtn" class="next-round-btn hidden">Next Round</button>
     </div>
 
     <script>
@@ -444,6 +444,11 @@
         }
 
         function startGame() {
+            console.log('Start game clicked');
+            if (companies.length === 0) {
+                alert('Please wait, loading game data...');
+                return;
+            }
             document.getElementById('rulesModal').classList.add('hidden');
             document.getElementById('gameContainer').classList.remove('hidden');
             gameActive = true;
@@ -500,7 +505,7 @@
                 `;
 
                 if (type === 'player') {
-                    statRow.onclick = () => selectStat(statKey);
+                    statRow.addEventListener('click', () => selectStat(statKey));
                 }
 
                 container.appendChild(statRow);
@@ -576,6 +581,10 @@
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             loadCompanies();
+
+            // Add event listeners
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('nextRoundBtn').addEventListener('click', nextRound);
         });
     </script>
 </body>
